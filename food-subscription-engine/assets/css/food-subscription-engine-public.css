@@ -1,0 +1,306 @@
+/**
+ * All of the CSS for your public-facing functionality should be
+ * included in this file.
+ */
+
+.fse-subscribe-button-container {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.fse-subscribe-button {
+    /* Add specific styling if needed, otherwise inherits from theme button styles */
+}
+
+/* Modal Styles */
+.fse-modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 10000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    padding-top: 60px;
+}
+
+.fse-modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 700px;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+.fse-modal-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}
+
+.fse-modal-close:hover,
+.fse-modal-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.fse-modal-header h2 {
+    margin-top: 0;
+}
+
+.fse-tabs {
+    overflow: hidden;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 15px;
+}
+
+.fse-tabs button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+    border-bottom: 3px solid transparent;
+}
+
+.fse-tabs button:hover {
+    background-color: #f1f1f1;
+}
+
+.fse-tabs button.active {
+    border-bottom: 3px solid #2196F3; /* Example color */
+    color: #2196F3;
+}
+
+.fse-tab-content {
+    display: none;
+    padding: 6px 12px;
+    border-top: none;
+}
+
+.fse-tab-content.active {
+    display: block;
+}
+
+.fse-modal-summary {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.fse-modal-summary h3 {
+    margin-top: 0;
+}
+
+#fse-selected-dates-summary ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+#fse-selected-dates-summary ul li {
+    padding: 3px 0;
+}
+
+.fse-modal-footer {
+    text-align: right;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+/* Alert Modal Specifics */
+.fse-alert-modal .fse-modal-content {
+    max-width: 400px;
+    text-align: center;
+}
+
+.fse-alert-modal .fse-modal-body p {
+    font-size: 1.1em;
+    margin-bottom: 20px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .fse-modal-content {
+        width: 90%;
+        margin: 10% auto;
+        padding: 15px;
+    }
+    .fse-tabs button {
+        padding: 10px 12px;
+        font-size: 15px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .fse-modal-content {
+        width: 95%;
+        margin: 15% auto;
+    }
+    .fse-tabs button {
+        width: 50%; /* Make tabs take full width on small screens */
+    }
+    .fse-modal-footer {
+        text-align: center;
+    }
+    .fse-modal-footer .button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .fse-modal-footer .button:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Calendar Styles */
+.fse-calendar-week {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+}
+
+.fse-weekly-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    min-width: 50px; /* Ensure buttons have some width */
+    text-align: center;
+}
+
+.fse-weekly-date .fse-day-name {
+    font-size: 0.8em;
+    color: #555;
+}
+
+.fse-weekly-date .fse-day-number {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.fse-calendar-month-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 5px 0;
+}
+
+.fse-calendar-month-header span {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.fse-month-nav {
+    background: none;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.fse-month-nav:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.fse-calendar-days-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.fse-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.fse-monthly-date, .fse-empty-cell {
+    padding: 10px 5px;
+    text-align: center;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.fse-monthly-date {
+    cursor: pointer;
+}
+
+.fse-empty-cell {
+    background-color: #f9f9f9;
+    visibility: hidden; /* Or just background-color: transparent; border: none; */
+}
+
+.fse-date-selector:disabled {
+    background-color: #f0f0f0;
+    color: #aaa;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.fse-date-selector.selected {
+    background-color: #2196F3; /* Example Theme Color */
+    color: white;
+    border-color: #1976D2;
+}
+
+.fse-date-selector.selected .fse-day-name {
+    color: #e0e0e0;
+}
+
+/* Responsive Calendar */
+@media screen and (max-width: 600px) {
+    .fse-weekly-date {
+        padding: 5px;
+        min-width: 40px;
+    }
+    .fse-weekly-date .fse-day-number {
+        font-size: 1em;
+    }
+    .fse-monthly-date, .fse-empty-cell {
+        padding: 8px 3px;
+    }
+    .fse-calendar-days-header span {
+        font-size: 0.9em;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .fse-weekly-date {
+        min-width: 35px;
+        font-size: 0.9em;
+    }
+     .fse-weekly-date .fse-day-name {
+        font-size: 0.7em;
+    }
+    .fse-monthly-date, .fse-empty-cell {
+        padding: 6px 2px;
+        font-size: 0.9em;
+    }
+    .fse-calendar-days-header span {
+        font-size: 0.8em;
+    }
+}
