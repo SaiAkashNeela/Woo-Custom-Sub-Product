@@ -232,6 +232,22 @@
                 return;
             }
 
+            console.log('FSE Debug: updateSummaryAndPrice called.');
+            console.log('FSE Debug: fse_params.i18n.currency_symbol =', (fse_params && fse_params.i18n) ? fse_params.i18n.currency_symbol : 'fse_params or fse_params.i18n not found');
+            
+            let currencySymbol = '$'; // Default to $
+            if (fse_params && fse_params.i18n && 
+                fse_params.i18n.currency_symbol && 
+                typeof fse_params.i18n.currency_symbol === 'string' && 
+                fse_params.i18n.currency_symbol.trim() !== '' && 
+                fse_params.i18n.currency_symbol.toLowerCase() !== 'undefined') {
+                currencySymbol = fse_params.i18n.currency_symbol;
+            }
+            console.log('FSE Debug: Determined currencySymbol =', currencySymbol);
+
+            let totalPrice = currentProductPrice * selectedDates.length;
+            console.log('FSE Debug: currentProductPrice =', currentProductPrice, ', selectedDates.length =', selectedDates.length, ', calculated totalPrice =', totalPrice);
+            
             let summaryHtml = '<ul>';
             selectedDates.forEach(dateStr => {
                 let dateObj = new Date(dateStr + 'T00:00:00'); // Ensure correct date parsing
@@ -241,13 +257,23 @@
             summaryHtml += '</ul>';
             $selectedDatesSummary.html(summaryHtml);
 
-            let totalPrice = currentProductPrice * selectedDates.length;
-            let currencySymbol = fse_params && fse_params.i18n && fse_params.i18n.currency_symbol ? fse_params.i18n.currency_symbol : '$'; // Default to $ if not set
-            $calculatedPrice.text(currencySymbol + totalPrice.toFixed(2));
+            if (isNaN(totalPrice) || typeof currentProductPrice !== 'number' || isNaN(currentProductPrice)) {
+                console.error('FSE Error: totalPrice is NaN or currentProductPrice is invalid. currentProductPrice:', currentProductPrice, 'Type:', typeof currentProductPrice);
+                let errorText = 'Error'; // Default error text
+                // You could add localized error strings to fse_params.i18n if needed, e.g.:
+                // if (fse_params && fse_params.i18n && fse_params.i18n.price_calculation_error) {
+                //     errorText = fse_params.i18n.price_calculation_error;
+                // }
+                $calculatedPrice.text(currencySymbol + errorText); 
+            } else {
+                $calculatedPrice.text(currencySymbol + totalPrice.toFixed(2));
+            }
+            console.log('FSE Debug: Final calculatedPrice text =', $calculatedPrice.text());
         }
 
         // --- Confirm Subscription --- 
         $('#fse-confirm-subscription-button').on('click', function() {
+            console.log('FSE Debug: Confirm Subscription button clicked.');
             if (selectedDates.length === 0) {
                 showAlert('Please select at least one delivery date.'); // TODO: i18n
                 return;
@@ -258,41 +284,58 @@
                 showAlert('Product ID not found. Please close the modal and try again.'); // TODO: i18n
                 return;
             }
+            console.log('FSE Debug: currentProductId =', currentProductId, 'currentVariationId =', currentVariationId);
 
             // Attempt to find the form associated with the current product ID.
-            // This assumes the .fse-subscribe-button is still present and identifiable.
-            // A more robust way might be to store a reference to the form when the modal opens.
             var $productForm = $('form.cart input[name="add-to-cart"][value="' + currentProductId + '"]').closest('form.cart'); 
+            console.log('FSE Debug: Attempt 1: $productForm based on input[name="add-to-cart"][value="' + currentProductId + '"] - Found:', $productForm.length);
+
             if (!$productForm.length) { // Fallback for variable products or different structures
                 if(currentVariationId) {
                      $productForm = $('form.cart input[name="variation_id"][value="' + currentVariationId + '"]').closest('form.cart');
+                     console.log('FSE Debug: Attempt 2: $productForm based on input[name="variation_id"][value="' + currentVariationId + '"] - Found:', $productForm.length);
                 }
                 if (!$productForm.length) { // General fallback if specific product/variation form not found
-                    $productForm = $('form.cart.variations_form').length ? $('form.cart.variations_form') : $('form.cart');
+                    $productForm = $('form.cart.variations_form').first(); // Try specific variations form first
+                    console.log('FSE Debug: Attempt 3: $productForm based on form.cart.variations_form - Found:', $productForm.length);
+                    if (!$productForm.length) {
+                        $productForm = $('form.cart').first(); // Most general cart form
+                        console.log('FSE Debug: Attempt 4: $productForm based on form.cart - Found:', $productForm.length);
+                    }
                 }
             }
 
             if (!$productForm.length) {
                 showAlert('Could not identify the product form. Please try adding to cart normally.'); // TODO: i18n
+                console.error('FSE Error: Product form not found after all attempts.');
                 return;
             }
+            console.log('FSE Debug: Final $productForm selected:', $productForm);
             
             // Remove any existing FSE fields to prevent duplication if user re-opens modal
             $productForm.find('.fse-custom-data-field').remove();
+            console.log('FSE Debug: Removed existing .fse-custom-data-field if any.');
 
             // Add hidden fields for subscription data
             $productForm.append('<input type="hidden" name="fse_selected_dates" class="fse-custom-data-field" value="' + JSON.stringify(selectedDates) + '">');
             $productForm.append('<input type="hidden" name="fse_is_subscription" class="fse-custom-data-field" value="true">');
+            console.log('FSE Debug: Appended hidden fields: fse_selected_dates, fse_is_subscription.');
             // The total price will be recalculated server-side based on these dates and product price
 
             // Find the original add to cart button and click it programmatically
-            var $addToCartButton = $productForm.find('.single_add_to_cart_button, button[name="add-to-cart"]'); // Broader selector for add to cart button
+            var $addToCartButton = $productForm.find('[type="submit"].single_add_to_cart_button, .single_add_to_cart_button, button[name="add-to-cart"], input[name="add-to-cart"]').first(); // Broader selector
+            console.log('FSE Debug: Attempting to find Add to Cart button with selector: [type="submit"].single_add_to_cart_button, .single_add_to_cart_button, button[name="add-to-cart"], input[name="add-to-cart"]');
+            console.log('FSE Debug: $addToCartButton found:', $addToCartButton.length, $addToCartButton);
+
             if ($addToCartButton.length) {
+                console.log('FSE Debug: Add to Cart button found. Triggering click...');
                 $addToCartButton.trigger('click');
                 closeModal($subscriptionModal);
+                console.log('FSE Debug: Modal closed after triggering click.');
                 // Optionally, show a success message or redirect, though WooCommerce usually handles this.
             } else {
                 showAlert('Could not find Add to Cart button.'); // TODO: i18n
+                console.error('FSE Error: Add to Cart button not found in the identified form.');
             }
         });
 
