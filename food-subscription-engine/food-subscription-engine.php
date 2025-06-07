@@ -95,3 +95,60 @@ function fse_woocommerce_not_active_notice() {
 }
 
 // TODO: Add further includes for admin, public, and includes functionalities.
+
+/**
+ * Add selected delivery dates to cart item data.
+ */
+add_filter( 'woocommerce_add_cart_item_data', 'fse_add_delivery_dates_to_cart_item', 10, 3 );
+function fse_add_delivery_dates_to_cart_item( $cart_item_data, $product_id, $variation_id ) {
+    if ( isset( $_POST['fse_selected_dates'] ) && ! empty( $_POST['fse_selected_dates'] ) ) {
+        $selected_dates = array_map( 'sanitize_text_field', explode( ',', $_POST['fse_selected_dates'] ) );
+        $cart_item_data['fse_delivery_dates'] = $selected_dates;
+    }
+    return $cart_item_data;
+}
+
+/**
+ * Display selected delivery dates in the cart.
+ */
+add_filter( 'woocommerce_get_item_data', 'fse_display_delivery_dates_in_cart', 10, 2 );
+function fse_display_delivery_dates_in_cart( $item_data, $cart_item ) {
+    if ( isset( $cart_item['fse_delivery_dates'] ) && ! empty( $cart_item['fse_delivery_dates'] ) ) {
+        $item_data[] = array(
+            'key'     => __( 'Delivery Dates', 'food-subscription-engine' ),
+            'value'   => fse_format_delivery_dates_for_display( $cart_item['fse_delivery_dates'] ),
+            'display' => '',
+        );
+    }
+    return $item_data;
+}
+
+/**
+ * Add selected delivery dates to order item meta.
+ */
+add_action( 'woocommerce_checkout_create_order_line_item', 'fse_add_delivery_dates_to_order_item_meta', 10, 4 );
+function fse_add_delivery_dates_to_order_item_meta( $item, $cart_item_key, $values, $order ) {
+    if ( isset( $values['fse_delivery_dates'] ) && ! empty( $values['fse_delivery_dates'] ) ) {
+        $item->add_meta_data( __( 'Delivery Dates', 'food-subscription-engine' ), fse_format_delivery_dates_for_display( $values['fse_delivery_dates'] ) );
+    }
+}
+
+/**
+ * Helper function to format delivery dates for display.
+ *
+ * @param array $dates Array of date strings (YYYY-MM-DD).
+ * @return string Formatted date string.
+ */
+function fse_format_delivery_dates_for_display( $dates ) {
+    if ( empty( $dates ) ) {
+        return '';
+    }
+    $formatted_dates = array();
+    foreach ( $dates as $date_str ) {
+        $date_obj = date_create_from_format('Y-m-d', $date_str);
+        if ($date_obj) {
+            $formatted_dates[] = $date_obj->format('D - jS M'); // e.g., Tue - 3rd Jun
+        }
+    }
+    return implode( ', ', $formatted_dates );
+}

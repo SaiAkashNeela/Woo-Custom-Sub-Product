@@ -235,15 +235,17 @@
             console.log('FSE Debug: updateSummaryAndPrice called.');
             console.log('FSE Debug: fse_params.i18n.currency_symbol =', (fse_params && fse_params.i18n) ? fse_params.i18n.currency_symbol : 'fse_params or fse_params.i18n not found');
             
-            let currencySymbol = '$'; // Default to $
+            let rawCurrencySymbol = '$'; // Default to $
             if (fse_params && fse_params.i18n && 
                 fse_params.i18n.currency_symbol && 
                 typeof fse_params.i18n.currency_symbol === 'string' && 
                 fse_params.i18n.currency_symbol.trim() !== '' && 
                 fse_params.i18n.currency_symbol.toLowerCase() !== 'undefined') {
-                currencySymbol = fse_params.i18n.currency_symbol;
+                rawCurrencySymbol = fse_params.i18n.currency_symbol;
             }
-            console.log('FSE Debug: Determined currencySymbol =', currencySymbol);
+            // Decode HTML entities from currency symbol
+            let currencySymbol = $('<textarea />').html(rawCurrencySymbol).text();
+            console.log('FSE Debug: Determined currencySymbol (decoded) =', currencySymbol);
 
             let totalPrice = currentProductPrice * selectedDates.length;
             console.log('FSE Debug: currentProductPrice =', currentProductPrice, ', selectedDates.length =', selectedDates.length, ', calculated totalPrice =', totalPrice);
@@ -328,11 +330,29 @@
             console.log('FSE Debug: $addToCartButton found:', $addToCartButton.length, $addToCartButton);
 
             if ($addToCartButton.length) {
-                console.log('FSE Debug: Add to Cart button found. Triggering click...');
-                $addToCartButton.trigger('click');
-                closeModal($subscriptionModal);
-                console.log('FSE Debug: Modal closed after triggering click.');
-                // Optionally, show a success message or redirect, though WooCommerce usually handles this.
+                    // Create a hidden input to store selected dates
+                    let datesInput = $('<input>')
+                        .attr('type', 'hidden')
+                        .attr('name', 'fse_selected_dates')
+                        .val(selectedDates.join(','));
+                    
+                    console.log('FSE Debug: Selected dates for submission: ', selectedDates.join(','));
+
+                    // Append the hidden input to the product form
+                    $productForm.append(datesInput);
+                    console.log('FSE Debug: Appended fse_selected_dates input to the form.');
+
+                    // Programmatically click the original 'Add to Cart' button
+                    $addToCartButton.click();
+                    console.log('FSE Debug: Clicked original Add to Cart button.');
+
+                    // Optionally, close the modal after a short delay
+                    // And remove the temporary input to avoid issues if the modal is reopened without a page refresh
+                    setTimeout(function() {
+                        closeModal();
+                        datesInput.remove(); 
+                        console.log('FSE Debug: Closed modal and removed temporary dates input.');
+                    }, 1000); // Adjust delay as needed
             } else {
                 showAlert('Could not find Add to Cart button.'); // TODO: i18n
                 console.error('FSE Error: Add to Cart button not found in the identified form.');
